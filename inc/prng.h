@@ -1,5 +1,5 @@
-#ifndef __CORDAC_ACORN_PRNG_H__
-#define __CORDAC_ACORN_PRNG_H__
+#ifndef __MCN_ACORN_PRNG_H__
+#define __MCN_ACORN_PRNG_H__
 
 // implementation of the ACORN algorithm for seeded pseudo-random numbers
 // base off of description provided at https://web.archive.org/web/20050824081746/http://www.siam.org/siamnews/11-00/splitting.pdf

@@ -1,11 +1,12 @@
-#ifndef __CORDAC_PERLIN_H__
-#define __CORDAC_PERLIN_H__
+#ifndef __MCN_PERLIN_H__
+#define __MCN_PERLIN_H__
 
 // perlin noise with options for multiple octaves, persistance, and lacunarity.
 
 #include <stdint.h>
 
 #include "prng.h"
+#include "cmath.h"
 
 struct {
 	double lacunarity;
@@ -43,13 +44,18 @@ double __perlin_lintp(double _v, double _0, double _1) {
 	return _v * (_1 - _0) + _0;
 }
 
+// fade function (sigmoid approximation)
+double __perlin_fade(double _t) {
+	return _t * _t * _t * (_t * (6 * _t - 15) + 10);
+}
+
 void pl_init(uint32_t _seed, uint8_t _octaves, double _lacunarity, double _persistance) {
 	plc.lacunarity = _lacunarity;
 	plc.persistance = _persistance;
 	plc.octaves = _octaves;
 	
 	// set seed for PRNG
-	if (!prc.seed) pr_init(_seed);
+	if (!prc.seed[0]) pr_init(_seed);
 	else pr_set_seed(_seed);
 	
 	// setup permutation table
@@ -73,65 +79,54 @@ void pl_init(uint32_t _seed, uint8_t _octaves, double _lacunarity, double _persi
 }
 
 double perlin(double _x, double _y, double _z) {
-	double max_value = 0;
-	double result = 0;
+	_x /= 16, _y /= 16, _z /= 16;
+	double divisor = 0;
 	double factor = 1;
-	double scale = 0.8;
+	double result = 0;
 	
-	for (int oc = 0; oc < plc.octaves; oc++) {
+	for (int i = 0; i < plc.octaves; i++) {
 		// find grid points in neighbourhood of point (x, y, z)
 		// & with 256 same as mod with 256 (make sure coordinates are in bounds)
-		unsigned x0 = (int) (_x * scale) - (_x * scale < 0), x1 = (x0 + 1);
-		unsigned y0 = (int) (_y * scale) - (_y * scale < 0), y1 = (y0 + 1);
-		unsigned z0 = (int) (_z * scale) - (_z * scale < 0), z1 = (z0 + 1);
+		int x = (int) floor(_x) & 255;
+		int y = (int) floor(_y) & 255;
+		int z = (int) floor(_z) & 255;
 		
-		// relative coordinates of point in interval [0.0, 1.0]
-		double rx0 = (_x * scale) - (double) x0, rx1 = rx0 - 1;
-		double ry0 = (_y * scale) - (double) y0, ry1 = ry0 - 1;
-		double rz0 = (_z * scale) - (double) z0, rz1 = rz0 - 1;
-		
-		// make noise wrap by ensuring all values can index the permutation table from 0-255
-		x0 = x0 & 256;
-		y0 = y0 & 256;
-		z0 = z0 & 256;
+		double X = _x - floor(_x);
+		double Y = _y - floor(_y);
+		double Z = _z - floor(_z);
 		
 		// smooth result by putting points throush a fade function (quintic function - 6x^5 - 15x^4 + 10x^3)
-		double u = rx0 * rx0 * rx0 * (rx0 * (6 * rx0 - 15) + 10);
-		double v = ry0 * ry0 * ry0 * (ry0 * (6 * ry0 - 15) + 10);
-		double w = rz0 * rz0 * rz0 * (rz0 * (6 * rz0 - 15) + 10);
+		double u = __perlin_fade(X);
+		double v = __perlin_fade(Y);
+		double w = __perlin_fade(Z);
+		
+		int A = plc.table[x    ] + y, AA = plc.table[A] + z, AB = plc.table[A + 1] + z;
+		int B = plc.table[x + 1] + y, BA = plc.table[B] + z, BB = plc.table[B + 1] + z;
+		
 		
 		// compute dot product of offset vectors with random gradient vectors (picked out of a set
 		// of twelve unique based on PRNG using the permutation table)
-		double gdot000 = __perlin_grad(plc.table[plc.table[plc.table[x0] + y0] + z0], rx0, ry0, rz0);
-		double gdot001 = __perlin_grad(plc.table[plc.table[plc.table[x0] + y0] + z1], rx0, ry0, rz1);
-		double gdot010 = __perlin_grad(plc.table[plc.table[plc.table[x0] + y1] + z0], rx0, ry1, rz0);
-		double gdot011 = __perlin_grad(plc.table[plc.table[plc.table[x0] + y1] + z1], rx0, ry1, rz1);
-		double gdot100 = __perlin_grad(plc.table[plc.table[plc.table[x1] + y0] + z0], rx1, ry0, rz0);
-		double gdot101 = __perlin_grad(plc.table[plc.table[plc.table[x1] + y0] + z1], rx1, ry0, rz1);
-		double gdot110 = __perlin_grad(plc.table[plc.table[plc.table[x1] + y1] + z0], rx1, ry1, rz0);
-		double gdot111 = __perlin_grad(plc.table[plc.table[plc.table[x1] + y1] + z1], rx1, ry1, rz1);
+		result += factor *
+		__perlin_lintp(w, __perlin_lintp(v, __perlin_lintp(u, __perlin_grad(plc.table[AA    ], X    , Y    , Z    ),
+															  __perlin_grad(plc.table[BA    ], X - 1, Y    , Z    )),
+											__perlin_lintp(u, __perlin_grad(plc.table[AB    ], X    , Y - 1, Z    ),
+															  __perlin_grad(plc.table[BB    ], X - 1, Y - 1, Z    ))),
+						  __perlin_lintp(v, __perlin_lintp(u, __perlin_grad(plc.table[AA + 1], X    , Y    , Z - 1),
+															  __perlin_grad(plc.table[BA + 1], X - 1, Y    , Z - 1)),
+											__perlin_lintp(u, __perlin_grad(plc.table[AB + 1], X    , Y - 1, Z - 1),
+															  __perlin_grad(plc.table[BB + 1], X - 1, Y - 1, Z - 1))));
 		
-		double k0 = gdot000;
-		double k1 = gdot100 - gdot000;
-		double k2 = gdot010 - gdot000;
-		double k3 = gdot001 - gdot000;
-		double k4 = gdot000 + gdot110 - gdot100 - gdot010;
-		double k5 = gdot000 + gdot101 - gdot100 - gdot001;
-		double k6 = gdot000 + gdot011 - gdot010 - gdot001;
-		double k7 = gdot100 + gdot010 + gdot001 + gdot111 - gdot000 - gdot110 - gdot101 - gdot011;
-		
-		result += factor * (k0 + k1 * u + k2 * v + k3 * w + k4 * u * v + k5 * u * w + k6 * v * w + k7 * u * v * w);
-		
-		// after each pass, multiply the point in the next pass by the scale (lacunarity)
-		// and multiply the result by the persistance (usually less than 1.0)
+		divisor += factor;
 		factor *= plc.persistance;
-		scale *= plc.lacunarity;
+		
+		_x *= plc.lacunarity;
+		_y *= plc.lacunarity;
+		_z *= plc.lacunarity;
 	}
 	
-	result /= plc.octaves;
-	result /= 4;
+	result /= divisor;
 	
-	return 0.5 * result / sqrt(1 + result * result) + 0.5;
+	return result;
 }
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef __CORDAC_LINUX_FRAMEBUFFER_CORE_H__
-#define __CORDAC_LINUX_FRAMEBUFFER_CORE_H__
+#ifndef __MCN_LINUX_FRAMEBUFFER_CORE_H__
+#define __MCN_LINUX_FRAMEBUFFER_CORE_H__
 
 #include <sys/mman.h>
 #include <string.h>

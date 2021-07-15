@@ -1,12 +1,14 @@
-#ifndef __CORDAC_MATH_H__
-#define __CORDAC_MATH_H__
+#ifndef __MCN_CUSTOM_MATH_H__
+#define __MCN_CUSTOM_MATH_H__
 
-int abs(int _x) {
-	return _x - 2 * (_x < 0) * _x;
-}
+#include <math.h>
 
-double dabs(double _x) {
-	return _x - 2 * (_x < 0) * _x;
+#define SIGN(X) ((X > 0) - (X < 0))
+#define ABS(X) (X * SIGN(X))
+
+__attribute__((__always_inline__)) inline double FABS(double X) {
+	*((uint_fast64_t*) &X) &= 0x7FFFFFFFFFFFFFFF;
+	return X;
 }
 
 int min(int _a, int _b) {
@@ -36,20 +38,6 @@ int max3(int _a, int _b, int _c) {
 }
 
 int min4(int _a, int _b, int _c, int _d) {
-	if (_b < _a)
-		if (_c < _b)
-			if (_d < _c) return _d;
-			else return _c;
-		else if (_d < _b) return _d;
-		else return _b;
-	else if (_c < _a)
-		if (_d < _c) return _d;
-		else return _c;
-	else if (_d < _a) return _d;
-	else return _a;
-}
-
-double dmin4(double _a, double _b, double _c, double _d) {
 	if (_b < _a)
 		if (_c < _b)
 			if (_d < _c) return _d;
