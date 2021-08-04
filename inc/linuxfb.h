@@ -1,15 +1,21 @@
 #ifndef __MCN_LINUX_FRAMEBUFFER_CORE_H__
 #define __MCN_LINUX_FRAMEBUFFER_CORE_H__
 
-#include <sys/mman.h>
-#include <string.h>
+
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdint.h>
 #include <malloc.h>
 
-#include <sys/ioctl.h>
 #include <linux/fb.h>
+#include <linux/mman.h>
+
+extern void* mmap(void*, size_t, int, int, int, off_t);
+extern void* munmap(void*, size_t);
+extern void* memset(void*, int, size_t);
+extern void* memcpy(void*, void*, size_t);
+
+extern int ioctl(int, unsigned long, ...) __THROW;
 
 typedef struct __attribute__((__packed__)) {
 	uint8_t r, g, b, x;

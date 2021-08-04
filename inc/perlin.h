@@ -87,13 +87,13 @@ double perlin(double _x, double _y, double _z) {
 	for (int i = 0; i < plc.octaves; i++) {
 		// find grid points in neighbourhood of point (x, y, z)
 		// & with 256 same as mod with 256 (make sure coordinates are in bounds)
-		int x = (int) floor(_x) & 255;
-		int y = (int) floor(_y) & 255;
-		int z = (int) floor(_z) & 255;
+		int x = IFLOOR(_x) & 255;
+		int y = IFLOOR(_y) & 255;
+		int z = IFLOOR(_z) & 255;
 		
-		double X = _x - floor(_x);
-		double Y = _y - floor(_y);
-		double Z = _z - floor(_z);
+		double X = _x - IFLOOR(_x);
+		double Y = _y - IFLOOR(_y);
+		double Z = _z - IFLOOR(_z);
 		
 		// smooth result by putting points throush a fade function (quintic function - 6x^5 - 15x^4 + 10x^3)
 		double u = __perlin_fade(X);

@@ -14,6 +14,10 @@ typedef struct {
 } vec2i;
 
 typedef struct {
+	int x, y, z;
+} vec3i;
+
+typedef struct {
 	double x, y, z;
 } vec3;
 
@@ -54,32 +58,32 @@ mat3 mT3(mat3 _m) {
 	parameters:
 	_m is the (non-inverted) 4 by 4 affine matrix, and _v is the vector to be multiplied.
 */
-vec3 mmul_inv_affine(mat4 _m, vec3 _v) {
-	_v.x -= _m.get[3 ];
-	_v.y -= _m.get[7 ];
-	_v.z -= _m.get[11];
+vec3 mmul_inv_affine(mat4* _m, vec3 _v) {
+	_v.x -= _m->get[3 ];
+	_v.y -= _m->get[7 ];
+	_v.z -= _m->get[11];
 	
 	return (vec3) {
-		_m.get[0] * _v.x + _m.get[4] * _v.y + _m.get[8 ] * _v.z,
-		_m.get[1] * _v.x + _m.get[5] * _v.y + _m.get[9 ] * _v.z,
-		_m.get[2] * _v.x + _m.get[6] * _v.y + _m.get[10] * _v.z,
+		_m->get[0] * _v.x + _m->get[4] * _v.y + _m->get[8 ] * _v.z,
+		_m->get[1] * _v.x + _m->get[5] * _v.y + _m->get[9 ] * _v.z,
+		_m->get[2] * _v.x + _m->get[6] * _v.y + _m->get[10] * _v.z,
 	};
 }
 
-vec3 mmul_inv_affine_no_translation(mat4 _m, vec3 _v) {
+vec3 mmul_inv_affine_no_translation(mat4* _m, vec3 _v) {
 	return (vec3) {
-		_m.get[0] * _v.x + _m.get[4] * _v.y + _m.get[8 ] * _v.z,
-		_m.get[1] * _v.x + _m.get[5] * _v.y + _m.get[9 ] * _v.z,
-		_m.get[2] * _v.x + _m.get[6] * _v.y + _m.get[10] * _v.z,
+		_m->get[0] * _v.x + _m->get[4] * _v.y + _m->get[8 ] * _v.z,
+		_m->get[1] * _v.x + _m->get[5] * _v.y + _m->get[9 ] * _v.z,
+		_m->get[2] * _v.x + _m->get[6] * _v.y + _m->get[10] * _v.z,
 	};
 }
 
-vec4 mmul_vec4(mat4 _m, vec4 _v) {
+vec4 mmul_vec4(mat4* _m, vec4 _v) {
 	return (vec4) {
-		_m.get[0 ] * _v.x + _m.get[1 ] * _v.y + _m.get[2 ] * _v.z + _m.get[3 ] * _v.w,
-		_m.get[4 ] * _v.x + _m.get[5 ] * _v.y + _m.get[6 ] * _v.z + _m.get[7 ] * _v.w,
-		_m.get[8 ] * _v.x + _m.get[9 ] * _v.y + _m.get[10] * _v.z + _m.get[11] * _v.w,
-		_m.get[12] * _v.x + _m.get[13] * _v.y + _m.get[14] * _v.z + _m.get[15] * _v.w,
+		_m->get[0 ] * _v.x + _m->get[1 ] * _v.y + _m->get[2 ] * _v.z + _m->get[3 ] * _v.w,
+		_m->get[4 ] * _v.x + _m->get[5 ] * _v.y + _m->get[6 ] * _v.z + _m->get[7 ] * _v.w,
+		_m->get[8 ] * _v.x + _m->get[9 ] * _v.y + _m->get[10] * _v.z + _m->get[11] * _v.w,
+		_m->get[12] * _v.x + _m->get[13] * _v.y + _m->get[14] * _v.z + _m->get[15] * _v.w,
 	};
 }
 
@@ -91,24 +95,24 @@ vec3 mmul_vec3(mat3 _m, vec3 _v) {
 	};
 }
 
-mat4 mmul4(mat4 _a, mat4 _b) {
-	return (mat4) {{
-		_a.get[0] * _b.get[0 ] + _a.get[4] * _b.get[1 ] + _a.get[8 ] * _b.get[2 ] + _a.get[12] * _b.get[3 ],
-		_a.get[1] * _b.get[0 ] + _a.get[5] * _b.get[1 ] + _a.get[9 ] * _b.get[2 ] + _a.get[13] * _b.get[3 ],
-		_a.get[2] * _b.get[0 ] + _a.get[6] * _b.get[1 ] + _a.get[10] * _b.get[2 ] + _a.get[14] * _b.get[3 ],
-		_a.get[3] * _b.get[0 ] + _a.get[7] * _b.get[1 ] + _a.get[11] * _b.get[2 ] + _a.get[15] * _b.get[3 ],
-		_a.get[0] * _b.get[4 ] + _a.get[4] * _b.get[5 ] + _a.get[8 ] * _b.get[6 ] + _a.get[12] * _b.get[7 ],
-		_a.get[1] * _b.get[4 ] + _a.get[5] * _b.get[5 ] + _a.get[9 ] * _b.get[6 ] + _a.get[13] * _b.get[7 ],
-		_a.get[2] * _b.get[4 ] + _a.get[6] * _b.get[5 ] + _a.get[10] * _b.get[6 ] + _a.get[14] * _b.get[7 ],
-		_a.get[3] * _b.get[4 ] + _a.get[7] * _b.get[5 ] + _a.get[11] * _b.get[6 ] + _a.get[15] * _b.get[7 ],
-		_a.get[0] * _b.get[8 ] + _a.get[4] * _b.get[9 ] + _a.get[8 ] * _b.get[10] + _a.get[12] * _b.get[11],
-		_a.get[1] * _b.get[8 ] + _a.get[5] * _b.get[9 ] + _a.get[9 ] * _b.get[10] + _a.get[13] * _b.get[11],
-		_a.get[2] * _b.get[8 ] + _a.get[6] * _b.get[9 ] + _a.get[10] * _b.get[10] + _a.get[14] * _b.get[11],
-		_a.get[3] * _b.get[8 ] + _a.get[7] * _b.get[9 ] + _a.get[11] * _b.get[10] + _a.get[15] * _b.get[11],
-		_a.get[0] * _b.get[12] + _a.get[4] * _b.get[13] + _a.get[8 ] * _b.get[14] + _a.get[12] * _b.get[15],
-		_a.get[1] * _b.get[12] + _a.get[5] * _b.get[13] + _a.get[9 ] * _b.get[14] + _a.get[13] * _b.get[15],
-		_a.get[2] * _b.get[12] + _a.get[6] * _b.get[13] + _a.get[10] * _b.get[14] + _a.get[14] * _b.get[15],
-		_a.get[3] * _b.get[12] + _a.get[7] * _b.get[13] + _a.get[11] * _b.get[14] + _a.get[15] * _b.get[15],
+void mmul4(mat4* _r, mat4* _a, mat4* _b) {
+	*_r = (mat4) {{
+		_a->get[0] * _b->get[0 ] + _a->get[4] * _b->get[1 ] + _a->get[8 ] * _b->get[2 ] + _a->get[12] * _b->get[3 ],
+		_a->get[1] * _b->get[0 ] + _a->get[5] * _b->get[1 ] + _a->get[9 ] * _b->get[2 ] + _a->get[13] * _b->get[3 ],
+		_a->get[2] * _b->get[0 ] + _a->get[6] * _b->get[1 ] + _a->get[10] * _b->get[2 ] + _a->get[14] * _b->get[3 ],
+		_a->get[3] * _b->get[0 ] + _a->get[7] * _b->get[1 ] + _a->get[11] * _b->get[2 ] + _a->get[15] * _b->get[3 ],
+		_a->get[0] * _b->get[4 ] + _a->get[4] * _b->get[5 ] + _a->get[8 ] * _b->get[6 ] + _a->get[12] * _b->get[7 ],
+		_a->get[1] * _b->get[4 ] + _a->get[5] * _b->get[5 ] + _a->get[9 ] * _b->get[6 ] + _a->get[13] * _b->get[7 ],
+		_a->get[2] * _b->get[4 ] + _a->get[6] * _b->get[5 ] + _a->get[10] * _b->get[6 ] + _a->get[14] * _b->get[7 ],
+		_a->get[3] * _b->get[4 ] + _a->get[7] * _b->get[5 ] + _a->get[11] * _b->get[6 ] + _a->get[15] * _b->get[7 ],
+		_a->get[0] * _b->get[8 ] + _a->get[4] * _b->get[9 ] + _a->get[8 ] * _b->get[10] + _a->get[12] * _b->get[11],
+		_a->get[1] * _b->get[8 ] + _a->get[5] * _b->get[9 ] + _a->get[9 ] * _b->get[10] + _a->get[13] * _b->get[11],
+		_a->get[2] * _b->get[8 ] + _a->get[6] * _b->get[9 ] + _a->get[10] * _b->get[10] + _a->get[14] * _b->get[11],
+		_a->get[3] * _b->get[8 ] + _a->get[7] * _b->get[9 ] + _a->get[11] * _b->get[10] + _a->get[15] * _b->get[11],
+		_a->get[0] * _b->get[12] + _a->get[4] * _b->get[13] + _a->get[8 ] * _b->get[14] + _a->get[12] * _b->get[15],
+		_a->get[1] * _b->get[12] + _a->get[5] * _b->get[13] + _a->get[9 ] * _b->get[14] + _a->get[13] * _b->get[15],
+		_a->get[2] * _b->get[12] + _a->get[6] * _b->get[13] + _a->get[10] * _b->get[14] + _a->get[14] * _b->get[15],
+		_a->get[3] * _b->get[12] + _a->get[7] * _b->get[13] + _a->get[11] * _b->get[14] + _a->get[15] * _b->get[15],
 	}};
 }
 
@@ -121,17 +125,13 @@ vec3 cross3(vec3 _a, vec3 _b) {
 }
 
 vec3 norm3(vec3 _v) {
-	double mag = sqrt(_v.x * _v.x + _v.y * _v.y + _v.z * _v.z);
-	return (vec3) {_v.x / mag, _v.y / mag, _v.z / mag};
+	if ((!_v.x) & (!_v.y) & (!_v.y)) return (vec3) {0};
+	double mag = FISQRT(_v.x * _v.x + _v.y * _v.y + _v.z * _v.z);
+	return (vec3) {_v.x * mag, _v.y * mag, _v.z * mag};
 }
 
 double dot4(vec4 _a, vec4 _b) {
 	return _a.x * _b.x + _a.y * _b.y + _a.z * _b.z + _a.w * _b.w;
-}
-
-vec4 norm4(vec4 _v) {
-	double mag = sqrt(_v.x * _v.x + _v.y * _v.y + _v.z * _v.z + _v.w * _v.w);
-	return (vec4) {_v.x / mag, _v.y / mag, _v.z / mag, _v.w / mag};
 }
 
 #endif
