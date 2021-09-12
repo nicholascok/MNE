@@ -14,7 +14,6 @@ NOTE: bad code, done primarily for educational value.
 ![](/resources/v0.4.PNG)
 ---
 ![](/resources/v0.5.PNG)
----
 
 ### Errors
 ---
@@ -23,5 +22,4 @@ NOTE: bad code, done primarily for educational value.
 ![](/resources/err1.PNG)
 ---
 ![](/resources/err2.PNG)
----
 ---
