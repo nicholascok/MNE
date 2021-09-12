@@ -1,7 +1,7 @@
 # MNE
 voxel terrain generation with natively implemented graphics (no external libraries, even the standard library is avoided when possible).  
   
-NOTE: bad code, done primarily for educatinoal value.
+NOTE: bad code, done primarily for educational value.
 
 ### Development
 ---
